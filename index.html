@@ -1,0 +1,660 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>FEVER BUS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Rivers.Huang">
+    
+    
+    
+    
+    <link rel="alternative" href="/atom.xml" title="FEVER BUS" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="FEVER BUS" title="FEVER BUS"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="FEVER BUS">FEVER BUS</a></h1>
+				<h2 class="blog-motto">rivershuang&#39;s coding world</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main">
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/12/08/Android-Jni开发基础/" title="Android Jni开发基础" itemprop="url">Android Jni开发基础</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="http://yoursite.com/about" title="Rivers.Huang" target="_blank" itemprop="author">Rivers.Huang</a>
+		
+  <p class="article-time">
+    <time datetime="2014-12-08T08:30:46.000Z" itemprop="datePublished"> 发表于 12月 8 2014</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="什么是Jni">什么是Jni</h2>
+<ul>
+<li>JNI是Java Native Interface的简称，即Java本地开发接口</li>
+<li>JNI是一个协议，用来沟通Java代码和本地代码(C/C++)</li>
+</ul>
+<h2 id="为什么使用Jni">为什么使用Jni</h2>
+<ul>
+<li>Java语言没有的功能（很少）</li>
+<li>代码已经有现成的C/C++版本，不想重写（一般情况）</li>
+<li>Java太慢了（怎么慢？）</li>
+<li>跨平台实现（Mac, Windows, Android, iOS）</li>
+<li>特殊的功能性语言（Fortran的数学计算）</li>
+</ul>
+<h2 id="使用Jni的注意事项">使用Jni的注意事项</h2>
+<ul>
+<li>只提供了C/C++的支持，其他语言需要额外的步骤</li>
+<li>不安全，特别是内存管理，以及Java对象的引用计数</li>
+<li>不可移值，不同的CPU架构需要重新编译（arm, mips, x86）</li>
+</ul>
+<h2 id="如何使用Jni">如何使用Jni</h2>
+<h3 id="基础知识">基础知识</h3>
+<ul>
+<li>Android SDK(Java)</li>
+<li>C/C++语言</li>
+<li>NDK(Android.mk, ndk-build)</li>
+</ul>
+<h3 id="C/C++语言基础">C/C++语言基础</h3>
+<ul>
+<li>指针的使用</li>
+<li>内存管理：malloc, free, new, delete</li>
+<li>变量类型：int, float, double, char, …</li>
+<li>C++导出C函数：extern “C” { }</li>
+</ul>
+<h3 id="基本过程">基本过程</h3>
+<ol>
+<li>下载NDK，支持Windows、Linux和Mac OS X；</li>
+<li>解压NDK到本地磁盘，设置好PATH；</li>
+<li>新建Android工程，在工程目录下新建jni文件夹（文件夹名称必须是jni）；</li>
+<li>在jni文件夹下建立Android.mk文件（Android.mk文件的编写方法见后文）；</li>
+<li>在jni文件夹下编写好C/C++代码文件；</li>
+<li>命令行切换到当前目录，运行ndk-build，等待编译完成，编译完成后so文件在libs/armeabi文件夹下；</li>
+<li>在eclipse里运行Android工程，so文件会打包到apk里<br><em>TIPS：ADT插件安装选择Native Development，在工程的右键菜单有Android Tools/Add Native Support，集成了CDT的C/C++ IDE环境，在Java编译前执行ndk-build</em></li>
+</ol>
+<h3 id="Jni语法">Jni语法</h3>
+<ul>
+<li>HelloJni例子(NDK_DIR/samples/hello-jni)<br>&#160; &#160;1. HelloJni.java<br>&#160; &#160;2. HelloJni.c<br>&#160; &#160;3. Android.mk</li>
+</ul>
+<h3 id="HelloJni-java">HelloJni.java</h3>
+<pre><code><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloJni</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>{
+    <span class="comment">// ...</span>
+   <span class="keyword">public</span> <span class="keyword">native</span> String  <span class="title">stringFromJNI</span>(); <span class="comment">// 声明native</span>
+   <span class="keyword">static</span> {
+         <span class="comment">// 在libs/armeabi下加载libhello-jni.so</span>
+         System.loadLibrary(<span class="string">"hello-jni"</span>); 
+         <span class="comment">// 指定路径加载libhello-jni.so        </span>
+         <span class="comment">// System.load("path/libhello-jni.so");</span>
+    }
+}
+</code></pre><ul>
+<li>声明native函数，不用在Java中实现，建议native函数为private<br>&#160; &#160;1. 调用System.loadLibrary默认在libs/armeabi下加载so文件，名称与Android.mk里的LOCAL_MODULE一样<br>&#160; &#160;2. 调用System.load，指定so文件的完整路径，必须写完整so文件名</li>
+</ul>
+<h3 id="HelloJni-c">HelloJni.c</h3>
+<pre><code><span class="preprocessor">#<span class="keyword">include</span> &lt;string.h&gt;</span>
+<span class="preprocessor">#<span class="keyword">include</span> &lt;jni.h&gt;</span>
+jstring Java_com_example_hellojni_HelloJni_stringFromJNI( JNIEnv* env, jobject thiz )
+{
+    <span class="comment">// C的写法</span>
+    <span class="keyword">return</span> (*env)-&gt;NewStringUTF(env, <span class="string">"Hello from JNI !"</span>);
+    <span class="comment">// C++的写法</span>
+    <span class="comment">// return env-&gt;NewStringUTF("Hello form JNI !");</span>
+}
+</code></pre><ul>
+<li>函数名规则：Java<em>包名</em>类名_Java函数名( JNIEnv* env, jobject thiz, 其他参数)<br>&#160; &#160;1. 函数名可以用javah自动生成，命令行 $ cd bin $ javah -classpath . -jni com.example.hellojni.HelloJni<br>&#160; &#160;2. 产生对应包名的.h文件，实现.h的函数</li>
+<li>JNIEnv* env：JNI环境的指针，JVM当前线程的句柄，JNI函数调用入口</li>
+<li>jobject thiz：调用JNI函数当前对象的引用，相当于this指针</li>
+</ul>
+<h3 id="类型对应表">类型对应表</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Java Type</th>
+<th style="text-align:left">Native Type</th>
+<th style="text-align:left">Size in bits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">boolean</td>
+<td style="text-align:left">jboolean</td>
+<td style="text-align:left">8, unsigned</td>
+</tr>
+<tr>
+<td style="text-align:left">byte</td>
+<td style="text-align:left">jbyte</td>
+<td style="text-align:left">8</td>
+</tr>
+<tr>
+<td style="text-align:left">char</td>
+<td style="text-align:left">jchar</td>
+<td style="text-align:left">16, unsigned</td>
+</tr>
+<tr>
+<td style="text-align:left">short</td>
+<td style="text-align:left">jshort</td>
+<td style="text-align:left">16</td>
+</tr>
+<tr>
+<td style="text-align:left">int</td>
+<td style="text-align:left">jint</td>
+<td style="text-align:left">32</td>
+</tr>
+<tr>
+<td style="text-align:left">long</td>
+<td style="text-align:left">jlong</td>
+<td style="text-align:left">64</td>
+</tr>
+<tr>
+<td style="text-align:left">float</td>
+<td style="text-align:left">jfloat</td>
+<td style="text-align:left">32</td>
+</tr>
+<tr>
+<td style="text-align:left">double</td>
+<td style="text-align:left">jdouble</td>
+<td style="text-align:left">64</td>
+</tr>
+<tr>
+<td style="text-align:left">void</td>
+<td style="text-align:left">void</td>
+<td style="text-align:left">N/a</td>
+</tr>
+<tr>
+<td style="text-align:left">byte []</td>
+<td style="text-align:left">jbyteArray</td>
+<td style="text-align:left">8*n</td>
+</tr>
+<tr>
+<td style="text-align:left">class</td>
+<td style="text-align:left">Object</td>
+<td style="text-align:left">jobject    32</td>
+</tr>
+</tbody>
+</table>
+<h3 id="字符串">字符串</h3>
+<pre><code>//访问jstring
+char <span class="keyword">*</span>str = (<span class="keyword">*</span>env)-&gt;GetStringUTFChars(env,prompt,0);
+/<span class="keyword">*</span> this maps into regular C char<span class="keyword">*</span>  <span class="keyword">*</span>/
+printf(“%s”, str); /<span class="keyword">*</span> now it is ok to print <span class="keyword">*</span>/
+(<span class="keyword">*</span>env)-&gt;ReleaseStringUTFChars(env, prompt, str);
+/<span class="keyword">*</span> must release String to avoid memory leaks <span class="keyword">*</span>/
+
+//返回jstring
+char buf[128]; /<span class="keyword">*</span> allocate memory for local char<span class="keyword">*</span> in C <span class="keyword">*</span>/
+scanf(“%s”, buf); /<span class="keyword">*</span> read into char<span class="keyword">*</span> from stdio <span class="keyword">*</span>/
+return( (<span class="keyword">*</span>env)-&gt;NewStringUTF(env, buf)); 
+/<span class="keyword">*</span> construct and return the Java String <span class="keyword">*</span>/ 
+</code></pre><h3 id="数组">数组</h3>
+<pre><code>jsize <span class="function"><span class="title">len</span> = <span class="params">(*env)</span>-&gt;</span>GetArrayLength(env,arr);
+jint *<span class="function"><span class="title">body</span> = <span class="params">(*env)</span>-&gt;</span>GetIntArrayElements(env,arr,<span class="number">0</span>);
+<span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;len;++i){
+  sum += body[i]; 
+}
+<span class="function"><span class="params">(*env)</span>-&gt;</span>ReleaseIntArrayElements(env,arr,body,<span class="number">0</span>);
+<span class="regexp">/* very important – copies back to java array if copy had to be made */</span>
+</code></pre><ul>
+<li>其他类型（float, byte, double）的调用方式类似:<br>&#160; &#160;1. Get<type>ArrayElements<br>&#160; &#160;2. Release<type>ArrayElements<br><em>注意: 这些Get函数会拷贝数组，如果不需要内存拷贝，使用：Get/Set&lt;type&gt;ArrayRegion functions</em></type></type></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Get Function</th>
+<th style="text-align:left">Release Function</th>
+<th style="text-align:left">Array Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">GetBooleanArrayElements</td>
+<td style="text-align:left">ReleaseBooleanArrayElements</td>
+<td style="text-align:left">boolean</td>
+</tr>
+<tr>
+<td style="text-align:left">GetByteArrayElements</td>
+<td style="text-align:left">ReleaseByteArrayElements</td>
+<td style="text-align:left">byte</td>
+</tr>
+<tr>
+<td style="text-align:left">GetShortArrayElements</td>
+<td style="text-align:left">ReleaseShortArrayElements</td>
+<td style="text-align:left">short</td>
+</tr>
+<tr>
+<td style="text-align:left">GetIntArrayElements</td>
+<td style="text-align:left">ReleaseIntArrayElements</td>
+<td style="text-align:left">int</td>
+</tr>
+<tr>
+<td style="text-align:left">GetLongArrayElements</td>
+<td style="text-align:left">ReleaseLongArrayElements</td>
+<td style="text-align:left">long</td>
+</tr>
+<tr>
+<td style="text-align:left">GetFloatArrayElements</td>
+<td style="text-align:left">ReleaseFloatArrayElements</td>
+<td style="text-align:left">float</td>
+</tr>
+<tr>
+<td style="text-align:left">GetDoubleArrayElements</td>
+<td style="text-align:left">ReleaseDoubleArrayElements</td>
+<td style="text-align:left">double</td>
+</tr>
+<tr>
+<td style="text-align:left">GetObjectArrayElements</td>
+<td style="text-align:left">ReleaseObjectArrayElements</td>
+<td style="text-align:left">object</td>
+</tr>
+</tbody>
+</table>
+<h3 id="调用Java函数">调用Java函数</h3>
+<pre><code>jclass <span class="function"><span class="title">cls</span> = <span class="params">(*env)</span>-&gt;</span>GetObjectClass(env, thiz);
+jmethodID <span class="function"><span class="title">methodId</span> = <span class="params">(*env)</span>-&gt;</span>GetMethodID(env, cls, <span class="string">"getAout"</span>, <span class="string">"()I"</span>);
+bool <span class="function"><span class="title">use_opensles</span> = <span class="params">(*env)</span>-&gt;</span>CallIntMethod(env, thiz, methodId) == AOUT_OPENSLES;
+<span class="regexp">//</span> ...
+<span class="function"><span class="params">(*env)</span>-&gt;</span>DeleteLocalRef(env, cls);
+</code></pre><ul>
+<li>GetObjectClass获取得到调用JNI函数当前对象的类，如果不是当前对象的类，使用FindClass(JNIEnv *env, const char* className)</li>
+<li>GetMethodID获取调用JNI函数当前对象的类函数，getAout为Java函数名，()I为输入参数和返回值签名，签名的规则见后文</li>
+<li>CallIntMethod调用Java对象的getAout函数，返回值是int类型，无返回值函数调用CallVoidMethod，其他类型返回值依此类推，静态函数调用CallStaticTypeMethod</li>
+<li>DeleteLocalRef删除引用，cls使用完后，记得删除引用计数</li>
+</ul>
+<pre><code>//JNI回调函数的调用Java函数的方法如下
+JavaVM *myVm;
+jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+    myVm = vm; // Keep a reference on the Java VM.
+    <span class="keyword">return</span> JNI_VERSION_1_2;
+}
+static void CallbackFunc() {
+    JNIEnv *env;
+    <span class="keyword">if</span> ((*myVm)-&gt;AttachCurrentThread(myVm, &amp;env, <span class="literal">NULL</span>) &lt; <span class="number">0</span>)
+        <span class="keyword">return</span>;
+    // <span class="keyword">...</span>
+    (*myVm)-&gt;DetachCurrentThread(myVm);
+} 
+</code></pre><ul>
+<li>在JNI_OnLoad里保存JavaVM</li>
+<li>调用AttachCurrentThread获得JNIEnv，使用JNIEnv调用Java函数</li>
+<li>调用DetachCurrentThread解绑</li>
+</ul>
+<h3 id="Java函数变量签名">Java函数变量签名</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Java Type</th>
+<th style="text-align:left">Native Type</th>
+<th style="text-align:left">Size in bits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">boolean</td>
+<td style="text-align:left">jboolean</td>
+<td style="text-align:left">Z</td>
+</tr>
+<tr>
+<td style="text-align:left">byte</td>
+<td style="text-align:left">jbyte</td>
+<td style="text-align:left">B</td>
+</tr>
+<tr>
+<td style="text-align:left">char</td>
+<td style="text-align:left">jchar</td>
+<td style="text-align:left">C</td>
+</tr>
+<tr>
+<td style="text-align:left">short</td>
+<td style="text-align:left">jshort</td>
+<td style="text-align:left">S</td>
+</tr>
+<tr>
+<td style="text-align:left">int</td>
+<td style="text-align:left">jint</td>
+<td style="text-align:left">I</td>
+</tr>
+<tr>
+<td style="text-align:left">long</td>
+<td style="text-align:left">jlong</td>
+<td style="text-align:left">L</td>
+</tr>
+<tr>
+<td style="text-align:left">float</td>
+<td style="text-align:left">jfloat</td>
+<td style="text-align:left">F</td>
+</tr>
+<tr>
+<td style="text-align:left">double</td>
+<td style="text-align:left">jdouble</td>
+<td style="text-align:left">D</td>
+</tr>
+<tr>
+<td style="text-align:left">void</td>
+<td style="text-align:left">void</td>
+<td style="text-align:left">V</td>
+</tr>
+<tr>
+<td style="text-align:left">String</td>
+<td style="text-align:left">jstring</td>
+<td style="text-align:left">Ljava/lang/String;</td>
+</tr>
+</tbody>
+</table>
+<h3 id="加入Log">加入Log</h3>
+<pre><code><span class="preprocessor">#<span class="keyword">include</span> &lt;android/log.h&gt;</span>
+<span class="preprocessor">#<span class="keyword">define</span> LOG_TAG "System.out”</span>
+
+<span class="preprocessor">#<span class="keyword">define</span> LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)</span>
+<span class="preprocessor">#<span class="keyword">define</span> LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)</span>
+
+LOGI(<span class="string">"info\n"</span>);
+LOGD(<span class="string">"debug\n"</span>);
+LOGD(“The <span class="built_in">string</span> is %s”, p_str);
+</code></pre><ul>
+<li>Android.mk文件增加LOCAL_LDLIBS += -llog</li>
+<li>在LogCat里可以看到JNI输出的日志信息</li>
+</ul>
+<h3 id="Android-mk">Android.mk</h3>
+<pre><code><span class="constant">LOCAL_PATH :</span>= $(call my-dir) <span class="comment">// ①</span>
+
+include $(CLEAR_VARS) <span class="comment">// ②</span>
+<span class="constant">
+LOCAL_MODULE    :</span>= hello-jni <span class="comment">// ③</span>
+<span class="constant">LOCAL_SRC_FILES :</span>= hello-jni.c <span class="comment">// ④</span>
+
+include $(BUILD_SHARED_LIBRARY) <span class="comment">// ⑤</span>
+</code></pre><p>① LOCAL_PATH用于指定源代码的目录，my-dir宏函数是编译环境提供，表示当前文件夹<br>② CLEAR_VARS由编译系统提供，用于清除一些LOCAL_XXX的值（如：LOCAL_MODULE, LOCAL_SRC_FILES, LOCAL_STATIC_LIBRARIES …），不清除LOCAL_PATH<br>③ LOCAL_MODULE定义模块名称标识，名称必须唯一，不能包含空格，编译系统会编译生成lib<modulename>.so或lib<modulename>.a文件<br>④ LOCAL_SRC_FILES指定要编译的.c和.cpp文件，多个文件以空格分隔，换行连接符为 \<br>⑤ 编译成共享库，生成so文件，还可以是BUILD_STATIC_LIBRARY，编译静态库，即a文件，.a文件必须链接到so文件里<br>&#160; &#160;- LOCAL_LDLIBS := -llog –lz 加载liblog.a静态库和libz.a静态库，这两个静态库由NDK提供，也可以指定搜索路径加载编译好的静态库，使用-Lpath_to_lib/xxx.a<br>&#160; &#160;- LOCAL_STATIC_LIBRARIES += hello-jni表示编译依赖的静态库，在项目里的其他Android.mk文件定义<br>&#160; &#160;- LOCAL_C_INCLUDES += include指定include路径<br>&#160; &#160;- LOCAL_CFLAGS += -DANDROID=1定义ANDROID宏的值为1<br>&#160; &#160;- 多个共享库都需要调用loadLibrary加载，包括依赖的so库，Android不会自动寻找依赖库</modulename></modulename></p>
+<h2 id="内存管理">内存管理</h2>
+<h3 id="全局引用">全局引用</h3>
+<ul>
+<li>NewGlobalRef</li>
+<li>jobject NewGlobalRef(JNIEnv *env, jobject obj);</li>
+<li>创建一个新的obj全局引用，调用DeleteGlobalRef()释放全局引用</li>
+</ul>
+<h3 id="局部引用">局部引用</h3>
+<ul>
+<li>每一个传入到native函数的参数和返回值都是本地引用，其值只有在当前线程的native函数调用期间有效，当native函数返回，引用失效。适用于所以jobject派生类，包括jclass, jstring, jarray等。</li>
+<li>判断两个object引用是否一样，不能使用==，要使用函数IsSameObject。</li>
+<li>不能过度分配局部引用，当创建了大量的局部引用的适合，必须调用DeleteLocalRef手动释放局部引用，Android支持最多512个局部引用。</li>
+<li>jfieldID和jmethodID不是引用对象。</li>
+</ul>
+<h2 id="本文小结">本文小结</h2>
+<p>&#160; &#160; &#160; &#160;之前的博客被关闭暂时找不回，打算重新开一个博客，坚持记录一些。刚好最近公司的项目有个通过现有db来查找searchfile的功能，java层效率低，把之前的逻辑通过jni转到c++层去实现，于是就从这个开始写吧。<br>&#160; &#160; &#160; &#160;其实jni教程在现在的网络已经泛滥了，所以至于开发环境那些就懒得做了，结合之前公司技术分享的PPT写了这个还算详细的小结。<br>&#160; &#160; &#160; &#160;现在的JNI只是教别人怎么调底层的方法，但是在调用后毕竟要有回馈结果到界面给用户，打算之后会结合源码把JNI讲得更深入点，同时会用回调的逻辑。</p>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/12/08/hello-world/" title="Hello World" itemprop="url">Hello World</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="http://yoursite.com/about" title="Rivers.Huang" target="_blank" itemprop="author">Rivers.Huang</a>
+		
+  <p class="article-time">
+    <time datetime="2014-12-08T07:47:12.000Z" itemprop="datePublished"> 发表于 12月 8 2014</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>Welcome to <a href="http://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="http://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="http://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">trobuleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
+<h2 id="Quick_Start">Quick Start</h2>
+<h3 id="Create_a_new_post">Create a new post</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
+
+<p>More info: <a href="http://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
+<h3 id="Run_server">Run server</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
+
+<p>More info: <a href="http://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
+<h3 id="Generate_static_files">Generate static files</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
+
+<p>More info: <a href="http://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
+<h3 id="Deploy_to_remote_sites">Deploy to remote sites</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
+
+<p>More info: <a href="http://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    </article>
+
+
+
+
+
+
+
+</div>
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/Android-Jni-Native/" title="Android Jni Native">Android Jni Native<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Android-Jni-Native/" title="Android,Jni,Native">Android,Jni,Native<sup>0</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            <a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+          </li>
+        
+          <li>
+            <a href="http://hexo.io" target="_blank" title="Hexo">Hexo</a>
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Hello ,I&#39;m Rivers Page in Google. <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://zespia.tw/hexo/" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Pacman">Jacman</a> © 2014 
+		
+		<a href="http://yoursite.com/about" target="_blank" title="Rivers.Huang">Rivers.Huang</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+
+
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+  </body>
+ </html>
