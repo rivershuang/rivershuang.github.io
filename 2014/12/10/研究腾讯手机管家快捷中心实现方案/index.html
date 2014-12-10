@@ -1,0 +1,786 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>研究腾讯手机管家快捷中心实现方案 | FEVER BUS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Rivers.Huang">
+    
+    <meta name="description" content="背景
+想必用过Android腾讯手机管家或者做过相关研发的童鞋都会发现腾讯做了一个类似于iOS系统下的Panel功能，如下图一。
+这篇文章就主要介绍这个功能以及调出原理">
+    
+    
+    
+    
+    <link rel="alternative" href="/atom.xml" title="FEVER BUS" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="FEVER BUS" title="FEVER BUS"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="FEVER BUS">FEVER BUS</a></h1>
+				<h2 class="blog-motto">rivers huang&#39;s coding world</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/12/10/研究腾讯手机管家快捷中心实现方案/" title="研究腾讯手机管家快捷中心实现方案" itemprop="url">研究腾讯手机管家快捷中心实现方案</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="http://yoursite.com/about" title="Rivers.Huang" target="_blank" itemprop="author">Rivers.Huang</a>
+		
+  <p class="article-time">
+    <time datetime="2014-12-10T09:05:42.000Z" itemprop="datePublished"> 发表于 12月 10 2014</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#设计原理"><span class="toc-number">2.</span> <span class="toc-text">设计原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实现方案"><span class="toc-number">3.</span> <span class="toc-text">实现方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码方案"><span class="toc-number">4.</span> <span class="toc-text">代码方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#FloatWindowQuickCenterTouch关键代码"><span class="toc-number">4.1.</span> <span class="toc-text">FloatWindowQuickCenterTouch关键代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FloatWindowQuickCenterShow关键代码"><span class="toc-number">4.2.</span> <span class="toc-text">FloatWindowQuickCenterShow关键代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FloatWindowQuickCenter关键代码"><span class="toc-number">4.3.</span> <span class="toc-text">FloatWindowQuickCenter关键代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FloatWindowManager关键代码"><span class="toc-number">4.4.</span> <span class="toc-text">FloatWindowManager关键代码</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#LayoutParams参数介绍"><span class="toc-number">4.4.1.</span> <span class="toc-text">LayoutParams参数介绍</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Service关键代码"><span class="toc-number">4.5.</span> <span class="toc-text">Service关键代码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#遗憾"><span class="toc-number">6.</span> <span class="toc-text">遗憾</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="背景">背景</h2>
+<p>想必用过Android腾讯手机管家或者做过相关研发的童鞋都会发现腾讯做了一个类似于iOS系统下的Panel功能，如下图一。<br><img src="http://img.blog.csdn.net/20141210172805118" alt="快捷中心主界面"></p>
+<p><strong>这篇文章就主要介绍这个功能以及调出原理</strong><br><a id="more"></a><br>在设置界面可以发现，实际是从屏幕的底部或者侧部用手势划出快捷中心控制面板，如下图二.<br><img src="http://img.blog.csdn.net/20141210172757125" alt="快捷中心设置界面"><br>有别于以前的快捷控制方案，以前的快捷控制方案是在下拉的通知栏里去做控制，如下图三的360方案，这个功能算是腾讯的一个微创新，要点赞。<br><img src="http://img.blog.csdn.net/20141210172811764" alt="传统的快捷中心界面"></p>
+<h2 id="设计原理">设计原理</h2>
+<p>&#160; &#160; &#160; &#160;看起来很高大上有木有。其实如果掌握了原理是非常简单的，就是运用了Android里的<strong>WindowManager</strong>技术，这个在很多国内各色各样的手机管家技术里用到的悬浮窗、一键加速是一样一样的（这里就不扩展了，网上一搜一大把），我猜腾讯手机管家用了一个小小的魔术，是什么呢，在图二中看到的选择后出现的蓝色小方块，在退出该界面后是没有的，但是实际上<strong>仍然预留了这样一个区域，只是色值设为透明了，通过监听用户在该区域上的手势滑动，从而拖出快捷中心面板</strong>。</p>
+<h2 id="实现方案">实现方案</h2>
+<ol>
+<li>实现FloatWindowQuickCenterTouch，用于实现监听手势拖出快捷中心</li>
+<li>实现FloatWindowQuickCenterShow，用于实现设置界面选择后的蓝色展示区域</li>
+<li>实现FloatWindowQuickCenter，用于实现快捷中心具体的界面和逻辑</li>
+<li>写一个FloatWindowManager管理类，实现以上几个悬浮窗的实例化和WindowManager实例与addView</li>
+<li>在一个Service中运用TimeTask监听悬浮窗的加载状态</li>
+</ol>
+<h2 id="代码方案">代码方案</h2>
+<h3 id="FloatWindowQuickCenterTouch关键代码">FloatWindowQuickCenterTouch关键代码</h3>
+<p>FloatWindowQuickCenterTouch主要是用于建立一块在桌面端的透明区域，通过监听手势拖出我们需要的快捷中心面板</p>
+<pre><code><span class="javadoc">/**
+ *<span class="javadoctag"> @Function</span> Touch区域实例化
+ */</span>
+<span class="keyword">public</span> <span class="title">FloatWindowQuickCenterTouch</span>(Context context, <span class="keyword">int</span> position) {
+    <span class="comment">// TODO Auto-generated constructor stub</span>
+    <span class="keyword">super</span>(context);
+    <span class="keyword">this</span>.mContext = context;
+    <span class="keyword">this</span>.mPosition = position; <span class="comment">//因为涉及到显示位置</span>
+
+    <span class="keyword">if</span> (position != QuickCenterParams.POSITION_RIGHT 
+            &amp;&amp; position != QuickCenterParams.POSITION_BOTTOM) 
+        position = QuickCenterParams.POSITION_RIGHT;
+
+    View touchView = <span class="keyword">new</span> View(context);    
+    LinearLayout.LayoutParams touchParams = <span class="keyword">new</span> LinearLayout.LayoutParams(
+            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+    <span class="keyword">if</span> (position == QuickCenterParams.POSITION_RIGHT) { <span class="comment">//支持右边和底部</span>
+        touchParams.height = mContext.getResources().getInteger(R.dimen.quick_view_right_height);
+        touchParams.width = mContext.getResources().getInteger(R.dimen.quick_view_right_width);        
+    } <span class="keyword">else</span> <span class="keyword">if</span> (position == QuickCenterParams.POSITION_BOTTOM) {
+        touchParams.height = mContext.getResources().getInteger(R.dimen.quick_view_bottom_height);
+        touchParams.width = GlobalApp.screenWidth; <span class="comment">//整个屏幕的宽度</span>
+    }    
+
+    touchView.setLayoutParams(touchParams);
+    touchView.setBackgroundColor(getResources().getColor(R.color.transparent)); <span class="comment">//注意我用了透明色</span>
+    <span class="keyword">this</span>.addView(touchView);
+}
+</code></pre><p>上面是这个View的实例化，之后在Manager类中就是通过调用这个方法来创建View；</p>
+<p>之后便是手势的监听，根据手势在该View上的位移来操作快捷中心面板的拖出操作；</p>
+<pre><code><span class="javadoc">/**
+ *<span class="javadoctag"> @Function</span> 重写touchevent
+ * 监听手势的位置位移，来创建快捷中心面板
+ * 注意要用getRawX/Y方法，与getX/Y的区别请自行百度
+ */</span>
+<span class="annotation">@Override</span>
+<span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onTouchEvent</span>(MotionEvent event) {
+    <span class="comment">// TODO Auto-generated method stub</span>
+    <span class="keyword">switch</span> (event.getAction()) {
+    <span class="keyword">case</span> MotionEvent.ACTION_DOWN:
+        xInView = event.getX();
+        yInView = event.getY();
+        xInScreen = event.getRawX();
+        yInScreen = event.getRawY() - getStatusBarHeight(); <span class="comment">//减去状态栏的高度</span>
+        <span class="keyword">break</span>;
+    <span class="keyword">case</span> MotionEvent.ACTION_MOVE:
+        <span class="keyword">break</span>;
+    <span class="keyword">case</span> MotionEvent.ACTION_UP:
+        xOutScreen = event.getRawX();
+        yOutScreen = event.getRawY();
+        <span class="keyword">if</span> (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) <span class="comment">//横屏不执行拖出面板</span>
+            <span class="keyword">return</span> <span class="keyword">super</span>.onTouchEvent(event);
+        <span class="keyword">if</span> (mPosition == QuickCenterParams.POSITION_RIGHT) {
+            <span class="keyword">if</span> (xInScreen - xOutScreen &gt; GlobalApp.screenWidth / <span class="number">5</span>) {
+                FloatWindowManager.createQuickCenterWindow(mContext, mPosition); <span class="comment">//这个就是之前提到的Manager类创建快捷中心的方法，之后在介绍</span>
+            }
+        } <span class="keyword">else</span> <span class="keyword">if</span> (mPosition == QuickCenterParams.POSITION_BOTTOM) {
+            <span class="keyword">if</span> (yInScreen - yOutScreen &gt; GlobalApp.screenHeight / <span class="number">6</span>) {
+                FloatWindowManager.createQuickCenterWindow(mContext, mPosition);
+            }
+        }
+        <span class="keyword">break</span>;
+    <span class="keyword">default</span>:
+        <span class="keyword">break</span>;
+    }
+    <span class="keyword">return</span> <span class="keyword">super</span>.onTouchEvent(event);
+}
+</code></pre><p>附送上一个获取状态栏高度的方法</p>
+<pre><code><span class="javadoc">/**
+ * 用于获取状态栏的高度。
+ *<span class="javadoctag"> @return</span> 返回状态栏高度的像素值。
+ */</span>
+<span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getStatusBarHeight</span>() {
+    <span class="keyword">if</span> (mStatusBarHeight == <span class="number">0</span>) {
+        <span class="keyword">try</span> {
+            Class&lt;?&gt; c = Class.forName(<span class="string">"com.android.internal.R$dimen"</span>);
+            Object o = c.newInstance();
+            Field field = c.getField(<span class="string">"status_bar_height"</span>);
+            <span class="keyword">int</span> x = (Integer) field.get(o);
+            mStatusBarHeight = getResources().getDimensionPixelSize(x);
+        } <span class="keyword">catch</span> (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    <span class="keyword">return</span> mStatusBarHeight;
+}
+</code></pre><h3 id="FloatWindowQuickCenterShow关键代码">FloatWindowQuickCenterShow关键代码</h3>
+<p>FloatWindowQuickCenterShow主要通过建立一块有色的和Touch相同大小的区域，在设置界面展示给用户</p>
+<pre><code><span class="javadoc">/**
+ *<span class="javadoctag"> @Function</span> Show区域实例化
+ * 与Touch类是一样的，只是改变了颜色，并且不用实现onTouchEvent监听了
+ */</span>
+<span class="keyword">public</span> <span class="title">FloatWindowQuickCenterShow</span>(Context context, <span class="keyword">int</span> position) {
+    <span class="keyword">super</span>(context);
+
+    <span class="keyword">if</span> (position != QuickCenterParams.POSITION_RIGHT 
+            &amp;&amp; position != QuickCenterParams.POSITION_BOTTOM) 
+        position = QuickCenterParams.POSITION_RIGHT;
+
+    View showView = <span class="keyword">new</span> View(context);    
+    LinearLayout.LayoutParams showParams = <span class="keyword">new</span> LinearLayout.LayoutParams(
+            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+    <span class="keyword">if</span> (position == QuickCenterParams.POSITION_RIGHT) {
+        showParams.height = context.getResources().getInteger(R.dimen.quick_view_right_height);
+        showParams.width = context.getResources().getInteger(R.dimen.quick_view_right_width);        
+    } <span class="keyword">else</span> <span class="keyword">if</span> (position == QuickCenterParams.POSITION_BOTTOM) {
+        showParams.height = context.getResources().getInteger(R.dimen.quick_view_bottom_height);
+        showParams.width = GlobalApp.screenWidth;
+    }    
+
+    showView.setLayoutParams(showParams);
+    showView.setBackgroundColor(getResources().getColor(R.color.blue)); <span class="comment">//其他都一样，就是这里换成了蓝色</span>
+    <span class="keyword">this</span>.addView(showView);
+}
+</code></pre><h3 id="FloatWindowQuickCenter关键代码">FloatWindowQuickCenter关键代码</h3>
+<p>&#160; &#160; &#160; &#160;这个是面板拖出来后的主要逻辑，里面的内容点还挺多也很杂，杂主要是因为Android碎片化严重，调用系统的功能，你能兼顾各个版本吧，兼顾各个厂商吧，之后我再写一篇来讲里面可能涉及到的问题点。就先贴一下创建的代码好了。</p>
+<pre><code><span class="javadoc">/**
+ *<span class="javadoctag"> @Function</span> 快捷中心面板
+ * 继承至LinearLayout，上面的几个view都是继承于它，便于简洁只写了这个，在此一并说明
+ */</span>
+<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FloatWindowQuickCenter</span> <span class="keyword">extends</span> <span class="title">LinearLayout</span> </span>{
+    <span class="javadoc">/**
+     *<span class="javadoctag"> @Function</span> 快捷中心实例化
+     * 这里我没有动态加载view，而是用了xml布局
+     */</span>
+    <span class="keyword">public</span> <span class="title">FloatWindowQuickCenter</span>(Context context, <span class="keyword">int</span> position) {
+        <span class="keyword">super</span>(context);
+        mView = LayoutInflater.from(context).inflate(R.layout.view_floatwindow_quickcenter, <span class="keyword">this</span>);
+        <span class="keyword">this</span>.mPosition = position;
+        <span class="keyword">this</span>.mContext = context;
+
+        <span class="comment">//其他功能代码</span>
+    }
+
+    <span class="comment">//其他功能代码</span>
+}
+</code></pre><h3 id="FloatWindowManager关键代码">FloatWindowManager关键代码</h3>
+<p>&#160; &#160; &#160; &#160;这个是自己建立的悬浮窗管理类，里面包含了创建与删除所有悬浮窗的方法，现在为了简洁只取其中一个来展示，其他都可以照猫画虎。里面的方法都采用<code>static</code>，方便直接调用，工具类一般如此写。</p>
+<pre><code><span class="javadoc">/**
+ *<span class="javadoctag"> @Function</span> 悬浮窗管理类
+ *<span class="javadoctag"> @author</span> rivers
+ */</span>
+<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FloatWindowManager</span> </span>{
+    <span class="javadoc">/**
+     * 用于控制在屏幕上添加或移除悬浮窗
+     */</span>
+    <span class="keyword">private</span> <span class="keyword">static</span> WindowManager mWindowManager;
+
+    <span class="javadoc">/**
+     * 如果WindowManager还未创建，则创建一个新的WindowManager返回。否则返回当前已创建的WindowManager。
+     * 
+     *<span class="javadoctag"> @param</span> context
+     *            必须为应用程序的Context.
+     *<span class="javadoctag"> @return</span> WindowManager的实例，用于控制在屏幕上添加或移除悬浮窗。
+     */</span>
+    <span class="keyword">private</span> <span class="keyword">static</span> WindowManager <span class="title">getWindowManager</span>(Context context) {
+        <span class="keyword">if</span> (mWindowManager == <span class="keyword">null</span>) {
+            mWindowManager = (WindowManager) context
+                    .getSystemService(Context.WINDOW_SERVICE);
+        }
+        <span class="keyword">return</span> mWindowManager;
+    }
+
+    <span class="javadoc">/**
+     * 快捷中心实例
+     */</span>
+    <span class="keyword">private</span> <span class="keyword">static</span> FloatWindowQuickCenter mFloatWindowQuickCenter;
+    <span class="javadoc">/**
+     * 快捷中心参数
+     */</span>
+    <span class="keyword">private</span> <span class="keyword">static</span> LayoutParams mQuickCenterParams;
+
+        <span class="javadoc">/**
+     * 快捷中心create方法
+     */</span>
+    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">createQuickCenterWindow</span>(Context context, <span class="keyword">int</span> position) {
+        mWindowManager = getWindowManager(context); <span class="comment">//检测windowmanager是否已经创建</span>
+        <span class="keyword">if</span> (mFloatWindowQuickCenter == <span class="keyword">null</span>) {
+            mFloatWindowQuickCenter = <span class="keyword">new</span> FloatWindowQuickCenter(context, position);
+            mQuickCenterParams = <span class="keyword">new</span> LayoutParams();
+            mQuickCenterParams.type = LayoutParams.TYPE_SYSTEM_ALERT;
+            mQuickCenterParams.format = PixelFormat.RGBA_8888;
+            mQuickCenterParams.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            mQuickCenterParams.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+            mQuickCenterParams.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+            mQuickCenterParams.x = <span class="number">0</span>;
+            mQuickCenterParams.y = <span class="number">0</span>;
+            <span class="keyword">if</span> (position == QuickCenterParams.POSITION_RIGHT) {
+                mQuickCenterParams.windowAnimations = android.R.style.Animation_Translucent;
+            } <span class="keyword">else</span> <span class="keyword">if</span> (position == QuickCenterParams.POSITION_BOTTOM) {
+                mQuickCenterParams.windowAnimations = android.R.style.Animation_InputMethod;
+            }
+            mWindowManager.addView(mFloatWindowQuickCenter, mQuickCenterParams);
+        }
+    }
+
+        <span class="javadoc">/**
+     * 快捷中心remove方法
+     */</span>
+    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">removeQuickCenterWindow</span>(Context context) {
+        <span class="keyword">if</span> (mFloatWindowQuickCenter != <span class="keyword">null</span>) {
+            mFloatWindowQuickCenter.clearAnimation();
+            mFloatWindowQuickCenter.unregisterReceiver();
+            mWindowManager.removeView(mFloatWindowQuickCenter);
+            mFloatWindowQuickCenter = <span class="keyword">null</span>;
+        }
+    }
+
+    <span class="comment">//其他的功能代码</span>
+    <span class="comment">//如show、touch都用类似的方法去执行创建和删除</span>
+}
+</code></pre><h4 id="LayoutParams参数介绍">LayoutParams参数介绍</h4>
+<p>&#160; &#160; &#160; &#160;需要注意的是LayoutParams这个参数，不是LinearLayout或者RelativeLayout下的LayoutParams，包全称为<code>android.view.WindowManager.LayoutParams</code>，是WindowManager下的专属参数，在create方法中也看到一些参数的定义了，是很重要的，直接影响到利用WindowManager创建的这个悬浮窗的级别和呈现方法、可操作性等。下面简单的介绍一下我用到的参数，更多的可以Google。</p>
+<p><strong>LayoutParams.type</strong><br>&#160; &#160; &#160; &#160;大概就是设置你的悬浮窗的类型，实际上是一个级别，我用的是<code>TYPE_SYSTEM_ALERT = 2003</code>，查阅API介绍为 Window type: system window，系统级的窗口，这样我们的所需要的窗口就能显示在界面了。</p>
+<pre><code><span class="javadoc">/**
+ * Start of system-specific window types.  These are not normally
+ * created by applications.
+ */</span>
+<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> FIRST_SYSTEM_WINDOW     = <span class="number">2000</span>;
+
+<span class="javadoc">/**
+ * Window type: the status bar.  There can be only one status bar
+ * window; it is placed at the top of the screen, and all other
+ * windows are shifted down so they are below it.
+ * In multiuser systems shows on all users' windows.
+ */</span>
+<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_STATUS_BAR         = FIRST_SYSTEM_WINDOW;
+
+<span class="javadoc">/**
+ * Window type: the search bar.  There can be only one search bar
+ * window; it is placed at the top of the screen.
+ * In multiuser systems shows on all users' windows.
+ */</span>
+<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_SEARCH_BAR         = FIRST_SYSTEM_WINDOW+<span class="number">1</span>;
+
+<span class="javadoc">/**
+ * Window type: phone.  These are non-application windows providing
+ * user interaction with the phone (in particular incoming calls).
+ * These windows are normally placed above all applications, but behind
+ * the status bar.
+ * In multiuser systems shows on all users' windows.
+ */</span>
+<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_PHONE              = FIRST_SYSTEM_WINDOW+<span class="number">2</span>;
+
+<span class="javadoc">/**
+ * Window type: system window, such as low power alert. These windows
+ * are always on top of application windows.
+ * In multiuser systems shows only on the owning user's window.
+ */</span>
+<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_SYSTEM_ALERT       = FIRST_SYSTEM_WINDOW+<span class="number">3</span>;
+</code></pre><p><strong>LayoutParams.flag</strong><br>&#160; &#160; &#160; &#160;常用的有<code>FLAG_NOT_FOCUSABLE</code>，<code>FLAG_NOT_TOUCHABLE</code>，<code>FLAG_NOT_TOUCH_MODAL</code>，按照我理解的意思分别为：</p>
+<ol>
+<li>如果使用了就touch事件就会被拦截，悬浮窗下面的view事件就不能触发了，如我在设置界面的展示区域就设置了这个flag，不然就不能操作了</li>
+<li>touch事件不能用，永远接受不到touch event</li>
+<li>即使这个窗口被聚焦了，允许事件传递到下一层，在我们定义的窗口之外，所以一般会用这个，如dialog</li>
+</ol>
+<p>以上为我的理解，不对的地方请指正，下面贴一下官方的注释</p>
+<pre><code>/** <span class="type">Window</span> flag: this window won't ever get key input focus, so the
+ * user can <span class="keyword">not</span> send key <span class="keyword">or</span> other button events to it.  <span class="type">Those</span> will
+ * instead go to whatever focusable window <span class="keyword">is</span> behind it.  <span class="type">This</span> flag
+ * will also enable {@link <span class="comment">#FLAG_NOT_TOUCH_MODAL} whether or not that</span>
+ * <span class="keyword">is</span> explicitly <span class="type">set</span>.
+ * 
+ * &lt;p&gt;<span class="type">Setting</span> this flag also implies that the window will <span class="keyword">not</span> need to
+ * interact <span class="keyword">with</span>
+ * a soft input <span class="keyword">method</span>, so it will be Z-ordered <span class="keyword">and</span> positioned 
+ * independently <span class="keyword">of</span> <span class="type">any</span> active input <span class="keyword">method</span> (typically this means it
+ * gets Z-ordered on top <span class="keyword">of</span> the input <span class="keyword">method</span>, so it can use the full
+ * screen <span class="keyword">for</span> its content <span class="keyword">and</span> cover the input <span class="keyword">method</span> <span class="keyword">if</span> needed.  <span class="type">You</span>
+ * can use {@link <span class="comment">#FLAG_ALT_FOCUSABLE_IM} to modify this behavior. */</span>
+public <span class="keyword">static</span> final <span class="type">int</span> <span class="type">FLAG_NOT_FOCUSABLE</span>      = <span class="number">0x00000008</span>;
+
+/** <span class="type">Window</span> flag: this window can never receive touch events. */
+public <span class="keyword">static</span> final <span class="type">int</span> <span class="type">FLAG_NOT_TOUCHABLE</span>      = <span class="number">0x00000010</span>;
+
+/** <span class="type">Window</span> flag: even <span class="keyword">when</span> this window <span class="keyword">is</span> focusable (its
+ * {@link <span class="comment">#FLAG_NOT_FOCUSABLE} is not set), allow any pointer events</span>
+ * outside <span class="keyword">of</span> the window to be sent to the windows behind it.  <span class="type">Otherwise</span>
+ * it will consume all <span class="type">pointer</span> events itself, regardless <span class="keyword">of</span> whether they
+ * are inside <span class="keyword">of</span> the window. */
+public <span class="keyword">static</span> final <span class="type">int</span> <span class="type">FLAG_NOT_TOUCH_MODAL</span>    = <span class="number">0x00000020</span>;
+</code></pre><p><strong>LayoutParams.windowAnimations</strong><br>&#160; &#160; &#160; &#160;主要是窗口弹出的动画效果，我在项目中根据我的需求，右边我就用<code>android.R.style.Animation_Translucent</code>风格，位移推出快捷中心窗口，如果设置的从下拉出，则用<code>android.R.style.Animation_InputMethod</code>风格，类似于键盘的弹出，还有其他的风格，比如toast，dialog等，TX们可以自行google或者参看。</p>
+<p><strong>其他参数</strong><br>&#160; &#160; &#160; &#160;其他的参数还有：宽、高、xy坐标等，就不一一介绍了。</p>
+<h3 id="Service关键代码">Service关键代码</h3>
+<p>&#160; &#160; &#160; &#160;需用Service来创建和监听快捷中心，由于是桌面级的，我们只能用Service在后台去控制Manager类，并且用一个TimerTask去检测Touch区域的开启和关闭状态。</p>
+<pre><code><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FloatWindowService</span> <span class="keyword">extends</span> <span class="title">Service</span> </span>{
+    <span class="annotation">@Override</span>
+    <span class="keyword">public</span> <span class="keyword">int</span> <span class="title">onStartCommand</span>(Intent intent, <span class="keyword">int</span> flags, <span class="keyword">int</span> startId) {
+        <span class="comment">// 开启定时器</span>
+        mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        <span class="keyword">if</span> (timer == <span class="keyword">null</span>) {
+            timer = <span class="keyword">new</span> Timer();
+            RefreshTask freshTask=<span class="keyword">new</span> RefreshTask();
+            timer.scheduleAtFixedRate(freshTask, <span class="number">0</span>, <span class="number">1400</span>);
+        }
+        <span class="keyword">return</span> <span class="keyword">super</span>.onStartCommand(intent, flags, startId);
+    }
+
+    class RefreshTask extends TimerTask {
+
+        <span class="annotation">@Override</span>
+        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span>() {
+            String pckName = getRunningPck();
+            <span class="keyword">if</span> (pckName != <span class="keyword">null</span> &amp;&amp; !TextUtils.isEmpty(pckName)) {
+                <span class="keyword">if</span> (currentPkgName == <span class="keyword">null</span>) {
+                    currentPkgName = pckName;
+                    doRefresh();
+                } <span class="keyword">else</span> <span class="keyword">if</span> (!currentPkgName.equalsIgnoreCase(pckName)) {
+                    currentPkgName = pckName;
+                    doRefresh();
+                }
+            }
+        }
+
+    }
+
+    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doRefresh</span>() {
+        doRefreshFloat();
+        <span class="comment">//其他功能代码</span>
+    }
+
+    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doRefreshFloat</span>() {
+        <span class="keyword">if</span> (SharedUtil.getQuickCenterStatus()) { <span class="comment">//检测开启状态</span>
+            handler.post(<span class="keyword">new</span> Runnable() {
+
+                <span class="annotation">@Override</span>
+                <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span>() {
+                    <span class="comment">// TODO Auto-generated method stub</span>
+                    FloatWindowManager.createQuickCenterTouchArea(getApplicationContext(), SharedUtil.getQuickCenterPosition());
+                }
+            });
+
+
+        } <span class="keyword">else</span> {
+            FloatWindowManager.removeQuickCenterTouchArea(getApplication());
+            FloatWindowManager.removeQuickCenterWindow(getApplicationContext());
+        }
+    }
+
+    <span class="comment">//其他功能代码</span>
+}
+</code></pre><h2 id="总结">总结</h2>
+<p>&#160; &#160; &#160; &#160;这个一整套下来，一个类似于腾讯手机关键快捷中心的快捷方式就已经算是完成了，由于个人原因大概只能写了一个思路，尽可能的贴出关键代码，如果有需要的TX可以留言交流。<br>&#160; &#160; &#160; &#160;调出的原理懂了，至于快捷中心里面的东西就看需求个人发挥了，无非就是写一个布局，点击后实现功能罢了。这个我如果后面有时间会再写一片编码快捷中心面板时遇到的问题 ，由于是调用系统的功能，所以主要是碎片化的问题，包括版本适配（我从2.3适配到了5.0），以及厂商的适配等。</p>
+<h2 id="遗憾">遗憾</h2>
+<p>&#160; &#160; &#160; &#160;腾讯还是很牛的，有一个效果我一直没有实现，即我是通过在Touch区域监听手势滑动然后用动画效果拖出了快捷中心面板。而腾讯手机管家，可以真正做到抽屉（Panel）的效果，即可以在做手势的同时，没有UP的情况下，快捷中心面板就跟着手势滑动出来了，佩服佩服。<br>&#160; &#160; &#160; &#160;为什么佩服，做过Panel的童鞋会懂，如果你要拖出一个区域，那必须这个区域已经存在了，这样势必会覆盖住下面的东西，虽然没拖出来之前是显示空白，但是下面还是没法点击的。我百思不得其解，也研究了几天，目前仍未有答案，有相关经验的TX请告之，小弟感激不尽。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/编程/">编程</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Android/">Android</a><a href="/tags/UI/">UI</a><a href="/tags/快捷中心/">快捷中心</a><a href="/tags/悬浮窗/">悬浮窗</a>
+  </div>
+
+</div>
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://yoursite.com/2014/12/10/研究腾讯手机管家快捷中心实现方案/" data-title="研究腾讯手机管家快捷中心实现方案 | FEVER BUS" data-tsina="null" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2014/12/09/Jni层匹配MD5后回调至Java层的数据库查询方案/"  title="Jni层匹配MD5后回调至Java层的数据库查询方案">
+ <strong>下一篇：</strong><br/> 
+ <span>Jni层匹配MD5后回调至Java层的数据库查询方案
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section id="comments" class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#设计原理"><span class="toc-number">2.</span> <span class="toc-text">设计原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实现方案"><span class="toc-number">3.</span> <span class="toc-text">实现方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码方案"><span class="toc-number">4.</span> <span class="toc-text">代码方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#FloatWindowQuickCenterTouch关键代码"><span class="toc-number">4.1.</span> <span class="toc-text">FloatWindowQuickCenterTouch关键代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FloatWindowQuickCenterShow关键代码"><span class="toc-number">4.2.</span> <span class="toc-text">FloatWindowQuickCenterShow关键代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FloatWindowQuickCenter关键代码"><span class="toc-number">4.3.</span> <span class="toc-text">FloatWindowQuickCenter关键代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FloatWindowManager关键代码"><span class="toc-number">4.4.</span> <span class="toc-text">FloatWindowManager关键代码</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#LayoutParams参数介绍"><span class="toc-number">4.4.1.</span> <span class="toc-text">LayoutParams参数介绍</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Service关键代码"><span class="toc-number">4.5.</span> <span class="toc-text">Service关键代码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#遗憾"><span class="toc-number">6.</span> <span class="toc-text">遗憾</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+			<li><a href="/categories/编程/" title="编程">编程<sup>3</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/Android/" title="Android">Android<sup>3</sup></a></li>
+		
+			<li><a href="/tags/Jni/" title="Jni">Jni<sup>2</sup></a></li>
+		
+			<li><a href="/tags/悬浮窗/" title="悬浮窗">悬浮窗<sup>1</sup></a></li>
+		
+			<li><a href="/tags/快捷中心/" title="快捷中心">快捷中心<sup>1</sup></a></li>
+		
+			<li><a href="/tags/UI/" title="UI">UI<sup>1</sup></a></li>
+		
+			<li><a href="/tags/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            <a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+          </li>
+        
+          <li>
+            <a href="http://hexo.io" target="_blank" title="Hexo">Hexo</a>
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Hello ,I&#39;m Rivers Page in Google. <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://zespia.tw/hexo/" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Pacman">Jacman</a> © 2014 
+		
+		<a href="http://yoursite.com/about" target="_blank" title="Rivers.Huang">Rivers.Huang</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#nothing"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"rivershuang"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+  </body>
+</html>
