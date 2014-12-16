@@ -1,0 +1,611 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>FlashLight(闪关灯)在Android5.0上的实现方案 | FEVER BUS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Rivers.Huang">
+    
+    <meta name="description" content="背景
+&amp;#160; &amp;#160; &amp;#160; &amp;#160;在上一篇文章中我提到过在制作快捷中心的时候遇到Android碎片化的问题，首当其冲的就是这个FlashLight（闪光灯）在5.0系统上不能正常打开的问题。
+现象
+&amp;#160; &amp;#160; &amp;#160; &amp;#160;除了Lollipop系统，在其之下的版本按照现有的代码方案，对FlashLight控制没有任何问题。可是同样的代码，在Lollipop系统中却失效了。肯定是碎片化造成的问题。
+FlashLight在Lollipop版本之下的实现方案
+&amp;#160; &amp;#160; &amp;#160; &amp;#160;那么在解决这个问题之前，可以先看一看通常情况下FlashLight的控制方案。这个在Google上一搜一大堆，我照例只说关键点和开发中需要注意的地方。">
+    
+    
+    
+    
+    <link rel="alternative" href="/atom.xml" title="FEVER BUS" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="FEVER BUS" title="FEVER BUS"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="FEVER BUS">FEVER BUS</a></h1>
+				<h2 class="blog-motto">rivers huang&#39;s coding world</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/12/15/FlashLight(闪关灯)在Android5.0上的实现方案/" title="FlashLight(闪关灯)在Android5.0上的实现方案" itemprop="url">FlashLight(闪关灯)在Android5.0上的实现方案</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="http://yoursite.com/about" title="Rivers.Huang" target="_blank" itemprop="author">Rivers.Huang</a>
+		
+  <p class="article-time">
+    <time datetime="2014-12-15T05:27:58.000Z" itemprop="datePublished"> 发表于 12月 15 2014</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#现象"><span class="toc-number">2.</span> <span class="toc-text">现象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FlashLight在Lollipop版本之下的实现方案"><span class="toc-number">3.</span> <span class="toc-text">FlashLight在Lollipop版本之下的实现方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#打开接口"><span class="toc-number">3.1.</span> <span class="toc-text">打开接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#关闭接口"><span class="toc-number">3.2.</span> <span class="toc-text">关闭接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#注意事项"><span class="toc-number">3.3.</span> <span class="toc-text">注意事项</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#失效原因"><span class="toc-number">4.</span> <span class="toc-text">失效原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FlashLight在Lollipop版本中的实现方案"><span class="toc-number">5.</span> <span class="toc-text">FlashLight在Lollipop版本中的实现方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#FlashlightController流程"><span class="toc-number">5.1.</span> <span class="toc-text">FlashlightController流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实现方案"><span class="toc-number">5.2.</span> <span class="toc-text">实现方案</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FlashLight碎片化适配"><span class="toc-number">6.</span> <span class="toc-text">FlashLight碎片化适配</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="背景">背景</h2>
+<p>&#160; &#160; &#160; &#160;在上一篇文章中我提到过在制作快捷中心的时候遇到Android碎片化的问题，首当其冲的就是这个FlashLight（闪光灯）在5.0系统上不能正常打开的问题。</p>
+<h2 id="现象">现象</h2>
+<p>&#160; &#160; &#160; &#160;除了Lollipop系统，在其之下的版本按照现有的代码方案，对FlashLight控制没有任何问题。可是同样的代码，在Lollipop系统中却失效了。肯定是碎片化造成的问题。</p>
+<h2 id="FlashLight在Lollipop版本之下的实现方案">FlashLight在Lollipop版本之下的实现方案</h2>
+<p>&#160; &#160; &#160; &#160;那么在解决这个问题之前，可以先看一看通常情况下FlashLight的控制方案。这个在Google上一搜一大堆，我照例只说关键点和开发中需要注意的地方。<br><a id="more"></a></p>
+<h3 id="打开接口">打开接口</h3>
+<pre><code><span class="keyword">if</span> (<span class="variable">mCamera =</span>= <span class="constant">null</span>) {
+    <span class="variable">mCamera =</span> Camera.open();                
+}    
+mCamera.startPreview();
+<span class="variable">mParameters =</span> mCamera.getParameters();
+mParameters.setFlashMode(Parameters.FLASH_MODE_TORCH); //设置camera参数为Torch模式
+mCamera.setParameters(mParameters);    
+</code></pre><h3 id="关闭接口">关闭接口</h3>
+<pre><code>mParameters = mCamera.getParameters();
+mParameters.setFlashMode(Parameters.FLASH_MODE_OFF); <span class="comment">//设置camera参数为OFF模式</span>
+mCamera.setParameters(mParameters);
+mCamera.stopPreview();
+mCamera.release(); <span class="comment">//记得一定要释放</span>
+mCamera = <span class="literal">null</span>;
+</code></pre><h3 id="注意事项">注意事项</h3>
+<p>&#160; &#160; &#160; &#160;调用以上两个代码即可完成FlashLight的开关，但是在很多的Demo中大家举的例子是在一个Activity中进行开关闭，这样<code>Camera.Open()</code>这个参数不会重复调用，也无需判断Camera的状态，可是在我需要做的例子里是在一个View里进行开关，当View消失的时候，FlashLight仍然要维持当前的状态（打开或者关闭），这个时候我们就需要用到<strong>Service</strong>了。和View之间的通信就使用广播。</p>
+<pre><code><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FloatWindowService</span> <span class="keyword">extends</span> <span class="title">Service</span> </span>{
+    <span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">FlashlightSwitchReceiver</span> <span class="keyword">extends</span> <span class="title">BroadcastReceiver</span> </span>{
+        <span class="keyword">private</span> String action = <span class="keyword">null</span>;
+        <span class="annotation">@Override</span>
+        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onReceive</span>(Context context, Intent intent) {
+            <span class="keyword">if</span> (QuickCenterParams.MESSAGE_FLASHLIGHT_TURN_ON.equals(action)) {
+                <span class="keyword">if</span> (mCamera == <span class="keyword">null</span>) {
+                    mCamera = Camera.open();                
+                }    
+                mCamera.startPreview();
+                mParameters = mCamera.getParameters();
+                mParameters.setFlashMode(Parameters.FLASH_MODE_TORCH);
+                mCamera.setParameters(mParameters);    
+
+            } <span class="keyword">else</span> <span class="keyword">if</span> (QuickCenterParams.MESSAGE_FLASHLIGHT_TURN_OFF.equals(action)) {
+                mParameters = mCamera.getParameters();
+                mParameters.setFlashMode(Parameters.FLASH_MODE_OFF);
+                mCamera.setParameters(mParameters);
+                mCamera.stopPreview();
+                mCamera.release();
+                mCamera = <span class="keyword">null</span>;
+            }
+        }
+    }
+
+    <span class="comment">//其他功能代码</span>
+}
+</code></pre><p>还有几个个需要注意的地方：</p>
+<ol>
+<li>Camera的状态是无法判断的，所以需要本地存储。</li>
+<li>另外一个就是在关闭FlashLight的同时一定要释放掉Camera，否则下次选择会崩溃。</li>
+<li>再一个是需要在manifest中打开Camera权限。</li>
+<li>最后再多加一个FlashLight能否使用的判断代码块</li>
+</ol>
+<pre><code><span class="javadoc">/**
+ * 判断手机是否支持闪光灯
+ *<span class="javadoctag"> @param</span> context
+ *<span class="javadoctag"> @return</span>
+ */</span>
+<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isSupportFlashlight</span>(Context context) {
+    PackageManager packageManager = context.getPackageManager();
+    FeatureInfo[]  features = packageManager.getSystemAvailableFeatures();
+    <span class="keyword">for</span>(FeatureInfo f : features) {
+        <span class="keyword">if</span>(PackageManager.FEATURE_CAMERA_FLASH.equals(f.name)) 
+            <span class="keyword">return</span> <span class="keyword">true</span>;
+    }
+    <span class="keyword">return</span> <span class="keyword">false</span>;
+}
+</code></pre><h2 id="失效原因">失效原因</h2>
+<p>&#160; &#160; &#160; &#160;但是这套代码在Lollipop中却无法成功实现，百思不得其解，在Google上资料也比较少。<br>&#160; &#160; &#160; &#160;其实当我们在开发中把TargetSDKVersion设置为21的时候，就会发现原来写的<code>Camera.Open()</code>等方法全部划了根横线，说明在Lollipop的最新接口中已经提示开发者这个API有了替换方案，只是让我没想到的是直接不让用，够狠诶，看来版本判断跑不了了，碎片化真是够够够够够蛋疼。点进去看看描述：</p>
+<pre><code>/*
+ * <span class="property">@deprecated</span> We recommend using the <span class="keyword">new</span> {<span class="property">@link</span> android.hardware.camera2} API <span class="keyword">for</span> <span class="keyword">new</span>
+ *             applications.
+ */
+<span class="property">@Deprecated</span>
+public <span class="class"><span class="keyword">class</span> <span class="title">Camera</span> {</span>
+
+}
+</code></pre><p>可以看到已经明确提示用户使用camera2包下的代码了。这样就是为什么在Lollipop上之前的功能代码不能用的原因。</p>
+<h2 id="FlashLight在Lollipop版本中的实现方案">FlashLight在Lollipop版本中的实现方案</h2>
+<p>&#160; &#160; &#160; &#160;好在后来发现了在Android Lollipop的通知栏中有闪光灯开关的控制按键，相当于官方给予开发者的Demo。好吧，求人不如求己，去看源代码<a href="https://android.googlesource.com/platform/frameworks/base/+/android-5.0.0_r2/packages/SystemUI/src/com/android/systemui/statusbar/policy/FlashlightController.java%20%E2%80%9CFlashlightController.java%E2%80%9D" target="_blank" rel="external">FlashlightController.java</a>。</p>
+<h3 id="FlashlightController流程">FlashlightController流程</h3>
+<p><img src="http://img.blog.csdn.net/20141209181209703" alt="FlashlightController流程图"></p>
+<h3 id="实现方案">实现方案</h3>
+<p>&#160; &#160; &#160; &#160;源码中的使用了观察者模式，注册监听，都可以不理睬，主要还是因为原理不同了。Lollipop中用了<code>CameraDevice</code>剥离Camera对象、<code>CameraManager</code>管理类来管理设备、通过<code>CameraId</code>作为识别，猜测可能这样做能够扩展多摄像头的使用功能，代码逻辑上也确实更合理，有别于之前的Camera粗暴的打开和关闭，现在的Open用了下面的方案，在打开的时候注册了<code>CameraListener</code>以及<code>Handle</code>，通过这样的方式与UI交互。</p>
+<pre><code><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startDevice</span>() <span class="keyword">throws</span> CameraAccessException {
+    mCameraManager.openCamera(getCameraId(), mCameraListener, mHandler);
+}
+</code></pre><p>&#160; &#160; &#160; &#160;而我们也只需要在调用的时候直接通过<code>setFlashlight()</code>设置FlashLight可用性以及通过<code>killFlashlight()</code>直接关闭FlashLight。</p>
+<pre><code><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">setFlashlight</span>(<span class="keyword">boolean</span> enabled) {
+    <span class="keyword">if</span> (mFlashlightEnabled != enabled) {
+        mFlashlightEnabled = enabled;
+        postUpdateFlashlight();
+    }
+}
+
+<span class="keyword">public</span> <span class="keyword">void</span> <span class="title">killFlashlight</span>() {
+    <span class="keyword">boolean</span> enabled;
+    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) {
+        enabled = mFlashlightEnabled;
+    }
+    <span class="keyword">if</span> (enabled) {
+        mHandler.post(mKillFlashlightRunnable);
+    }
+}
+</code></pre><p>&#160; &#160; &#160; &#160;同时通过之前注册的Handle更新FlashLight的状态</p>
+<pre><code><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">updateFlashlight</span>(<span class="keyword">boolean</span> forceDisable) {
+    <span class="keyword">try</span> {
+        <span class="keyword">boolean</span> enabled;
+        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) {
+            enabled = mFlashlightEnabled &amp;&amp; !forceDisable;
+        }
+        <span class="keyword">if</span> (enabled) {
+            <span class="keyword">if</span> (mCameraDevice == <span class="keyword">null</span>) {
+                startDevice();
+                <span class="keyword">return</span>;
+            }
+            <span class="keyword">if</span> (mSession == <span class="keyword">null</span>) {
+                startSession();
+                <span class="keyword">return</span>;
+            }
+            <span class="keyword">if</span> (mFlashlightRequest == <span class="keyword">null</span>) {
+                CaptureRequest.Builder builder = mCameraDevice
+                        .createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+                builder.set(CaptureRequest.FLASH_MODE,
+                        CameraMetadata.FLASH_MODE_TORCH);
+                builder.addTarget(mSurface);
+                CaptureRequest request = builder.build();
+                mSession.capture(request, <span class="keyword">null</span>, mHandler);
+                mFlashlightRequest = request;
+            }
+        } <span class="keyword">else</span> {
+            <span class="keyword">if</span> (mCameraDevice != <span class="keyword">null</span>) {
+                mCameraDevice.close();
+                teardown();
+            }
+        }
+    } <span class="keyword">catch</span> (CameraAccessException e) {
+        Log.e(TAG, <span class="string">"Error in updateFlashlight"</span>, e);
+        handleError();
+    }
+}    
+</code></pre><h2 id="FlashLight碎片化适配">FlashLight碎片化适配</h2>
+<p>&#160; &#160; &#160; &#160;由于调用不同的API，并且在Lollipop上原来的接口不能再使用了，于是需要在实际的项目中做版本号适配，并且执行不同的使用方法</p>
+<pre><code><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FloatWindowService</span> <span class="keyword">extends</span> <span class="title">Service</span> </span>{
+    <span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">FlashlightSwitchReceiver</span> <span class="keyword">extends</span> <span class="title">BroadcastReceiver</span> </span>{
+        <span class="keyword">private</span> String action = <span class="keyword">null</span>;
+
+        <span class="annotation">@Override</span>
+        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onReceive</span>(Context context, Intent intent) {
+            <span class="comment">// TODO Auto-generated method stub</span>
+            action = intent.getAction();
+            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= <span class="number">21</span> <span class="comment">/*Build.VERSION_CODES.LOLLIPOP*/</span>) { <span class="comment">//版本适配</span>
+                <span class="keyword">if</span> (mFlashlightController == <span class="keyword">null</span>) {
+                    mFlashlightController = <span class="keyword">new</span> FlashlightController(context);
+                }            
+                <span class="keyword">if</span> (QuickCenterParams.MESSAGE_FLASHLIGHT_TURN_ON.equals(action)) {
+                    mFlashlightController.setFlashlight(<span class="keyword">true</span>); <span class="comment">//设置Torch</span>
+
+                } <span class="keyword">else</span> <span class="keyword">if</span> (QuickCenterParams.MESSAGE_FLASHLIGHT_TURN_OFF.equals(action)) {
+                    mFlashlightController.killFlashlight(); <span class="comment">//关闭Torch</span>
+                }
+
+            } <span class="keyword">else</span> {
+                <span class="comment">//这块代码可以参考文章之前提到的</span>
+            }
+
+    <span class="comment">//其他功能代码</span>
+}
+</code></pre><h2 id="总结">总结</h2>
+<p>&#160; &#160; &#160; &#160;当初做适配FlashLight这个碎片化的时候确实花了我不少精力，主要是花在查阅资料寻找问题上，找到Lollipop系统状态栏中的使用源码后，虽然可以拿来主义，但是还是要把它弄懂，相对一两行就能实现的代码，确实复杂了很多。如果有理解得不对或者说得不够清晰的地方，欢迎指正。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Android/">Android</a><a href="/tags/快捷中心/">快捷中心</a><a href="/tags/系统接口/">系统接口</a><a href="/tags/碎片化/">碎片化</a><a href="/tags/Lollipop/">Lollipop</a>
+  </div>
+
+</div>
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://yoursite.com/2014/12/15/FlashLight(闪关灯)在Android5.0上的实现方案/" data-title="FlashLight(闪关灯)在Android5.0上的实现方案 | FEVER BUS" data-tsina="null" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/12/16/在悬浮窗快捷中心中实现设置系统亮度功能/" title="在悬浮窗快捷中心中实现设置系统亮度功能">
+  <strong>上一篇：</strong><br/>
+  <span>
+  在悬浮窗快捷中心中实现设置系统亮度功能</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/12/10/研究腾讯手机管家快捷中心实现方案/"  title="研究腾讯手机管家快捷中心实现方案">
+ <strong>下一篇：</strong><br/> 
+ <span>研究腾讯手机管家快捷中心实现方案
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section id="comments" class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#现象"><span class="toc-number">2.</span> <span class="toc-text">现象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FlashLight在Lollipop版本之下的实现方案"><span class="toc-number">3.</span> <span class="toc-text">FlashLight在Lollipop版本之下的实现方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#打开接口"><span class="toc-number">3.1.</span> <span class="toc-text">打开接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#关闭接口"><span class="toc-number">3.2.</span> <span class="toc-text">关闭接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#注意事项"><span class="toc-number">3.3.</span> <span class="toc-text">注意事项</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#失效原因"><span class="toc-number">4.</span> <span class="toc-text">失效原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FlashLight在Lollipop版本中的实现方案"><span class="toc-number">5.</span> <span class="toc-text">FlashLight在Lollipop版本中的实现方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#FlashlightController流程"><span class="toc-number">5.1.</span> <span class="toc-text">FlashlightController流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实现方案"><span class="toc-number">5.2.</span> <span class="toc-text">实现方案</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FlashLight碎片化适配"><span class="toc-number">6.</span> <span class="toc-text">FlashLight碎片化适配</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+			<li><a href="/categories/编程/" title="编程">编程<sup>3</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/Android/" title="Android">Android<sup>5</sup></a></li>
+		
+			<li><a href="/tags/Jni/" title="Jni">Jni<sup>2</sup></a></li>
+		
+			<li><a href="/tags/碎片化/" title="碎片化">碎片化<sup>2</sup></a></li>
+		
+			<li><a href="/tags/系统接口/" title="系统接口">系统接口<sup>2</sup></a></li>
+		
+			<li><a href="/tags/快捷中心/" title="快捷中心">快捷中心<sup>2</sup></a></li>
+		
+			<li><a href="/tags/悬浮窗/" title="悬浮窗">悬浮窗<sup>1</sup></a></li>
+		
+			<li><a href="/tags/UI/" title="UI">UI<sup>1</sup></a></li>
+		
+			<li><a href="/tags/亮度/" title="亮度">亮度<sup>1</sup></a></li>
+		
+			<li><a href="/tags/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Lollipop/" title="Lollipop">Lollipop<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            <a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+          </li>
+        
+          <li>
+            <a href="http://hexo.io" target="_blank" title="Hexo">Hexo</a>
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Hello ,I&#39;m Rivers Page in Google. <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://zespia.tw/hexo/" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Pacman">Jacman</a> © 2014 
+		
+		<a href="http://yoursite.com/about" target="_blank" title="Rivers.Huang">Rivers.Huang</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#nothing"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"rivershuang"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+  </body>
+</html>

@@ -71,6 +71,99 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2014/12/16/在悬浮窗快捷中心中实现设置系统亮度功能/" title="在悬浮窗快捷中心中实现设置系统亮度功能" itemprop="url">在悬浮窗快捷中心中实现设置系统亮度功能</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="http://yoursite.com/about" title="Rivers.Huang" target="_blank" itemprop="author">Rivers.Huang</a>
+		
+  <p class="article-time">
+    <time datetime="2014-12-16T08:35:02.000Z" itemprop="datePublished"> 发表于 12月 16 2014</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="需求">需求</h2>
+<p>&#160; &#160; &#160; &#160;在悬浮窗的快捷中心中实现设置屏幕亮度的功能，一共有25/50/75/100%以及Auto五中模式。</p>
+<h2 id="实现方案">实现方案</h2>
+<p>&#160; &#160; &#160; &#160;这个功能刚开始查资料的时候觉得挺简单，就几句代码的事情，如下</p>
+<pre><code><span class="javadoc">/**
+ * 设置屏幕亮度
+ *<span class="javadoctag"> @param</span> brightness 即我们所希望的25/50/75/100
+ */</span>
+<span class="keyword">private</span> <span class="keyword">void</span> <span class="title">setScreenBrightness</span>(<span class="keyword">int</span> brightness) {
+    <span class="comment">// TODO Auto-generated method stub</span>
+    Settings.System.putInt(mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, (brightness * <span class="number">255</span> / <span class="number">100</span>));
+}
+</code></pre><p>&#160; &#160; &#160; &#160;并且可以通过下面的代码直接写入屏幕亮度模式（自动/普通）</p>
+<pre><code>Settings.System.putInt(mContext.getContentResolver(), 
+        Settings.System.SCREEN_BRIGHTNESS_MODE, Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL); <span class="comment">//普通模式</span>
+Settings.System.putInt(mContext.getContentResolver(), 
+        Settings.System.SCREEN_BRIGHTNESS_MODE, Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC); <span class="comment">//自动模式</span>
+</code></pre><h2 id="遇到问题">遇到问题</h2>
+<p>&#160; &#160; &#160; &#160;由于我用的测试设备是Nexus 5和MotoX，在Android Lollipop和KatKit版本上没有问题，点击Button后都生效，但是项目的测试童靴在别的测试机型和系统上发现了不能立即生效的问题，要在设置里点一次亮度进度条才生效。<br>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2014/12/16/在悬浮窗快捷中心中实现设置系统亮度功能/#more">Read More</a>
+          
+       </p>
+    </div>
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/12/15/FlashLight(闪关灯)在Android5.0上的实现方案/" title="FlashLight(闪关灯)在Android5.0上的实现方案" itemprop="url">FlashLight(闪关灯)在Android5.0上的实现方案</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="http://yoursite.com/about" title="Rivers.Huang" target="_blank" itemprop="author">Rivers.Huang</a>
+		
+  <p class="article-time">
+    <time datetime="2014-12-15T05:27:58.000Z" itemprop="datePublished"> 发表于 12月 15 2014</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="背景">背景</h2>
+<p>&#160; &#160; &#160; &#160;在上一篇文章中我提到过在制作快捷中心的时候遇到Android碎片化的问题，首当其冲的就是这个FlashLight（闪光灯）在5.0系统上不能正常打开的问题。</p>
+<h2 id="现象">现象</h2>
+<p>&#160; &#160; &#160; &#160;除了Lollipop系统，在其之下的版本按照现有的代码方案，对FlashLight控制没有任何问题。可是同样的代码，在Lollipop系统中却失效了。肯定是碎片化造成的问题。</p>
+<h2 id="FlashLight在Lollipop版本之下的实现方案">FlashLight在Lollipop版本之下的实现方案</h2>
+<p>&#160; &#160; &#160; &#160;那么在解决这个问题之前，可以先看一看通常情况下FlashLight的控制方案。这个在Google上一搜一大堆，我照例只说关键点和开发中需要注意的地方。<br>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2014/12/15/FlashLight(闪关灯)在Android5.0上的实现方案/#more">Read More</a>
+          
+       </p>
+    </div>
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2014/12/10/研究腾讯手机管家快捷中心实现方案/" title="研究腾讯手机管家快捷中心实现方案" itemprop="url">研究腾讯手机管家快捷中心实现方案</a>
   </h1>
   <p class="article-author">By
@@ -279,17 +372,25 @@
 	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
 		
-			<li><a href="/tags/Android/" title="Android">Android<sup>3</sup></a></li>
+			<li><a href="/tags/Android/" title="Android">Android<sup>5</sup></a></li>
 		
 			<li><a href="/tags/Jni/" title="Jni">Jni<sup>2</sup></a></li>
 		
-			<li><a href="/tags/悬浮窗/" title="悬浮窗">悬浮窗<sup>1</sup></a></li>
+			<li><a href="/tags/碎片化/" title="碎片化">碎片化<sup>2</sup></a></li>
 		
-			<li><a href="/tags/快捷中心/" title="快捷中心">快捷中心<sup>1</sup></a></li>
+			<li><a href="/tags/系统接口/" title="系统接口">系统接口<sup>2</sup></a></li>
+		
+			<li><a href="/tags/快捷中心/" title="快捷中心">快捷中心<sup>2</sup></a></li>
+		
+			<li><a href="/tags/悬浮窗/" title="悬浮窗">悬浮窗<sup>1</sup></a></li>
 		
 			<li><a href="/tags/UI/" title="UI">UI<sup>1</sup></a></li>
 		
+			<li><a href="/tags/亮度/" title="亮度">亮度<sup>1</sup></a></li>
+		
 			<li><a href="/tags/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Lollipop/" title="Lollipop">Lollipop<sup>1</sup></a></li>
 		
 		</ul>
 </div>
